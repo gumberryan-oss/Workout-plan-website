@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Workout Plan Generator</title>
+<style>
+body {
+  background: #071024;
+  color: #e6eef6;
+  font-family: sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+h1 {
+  color: #06b6d4;
+  text-align: center;
+}
+form {
+  background: rgba(255,255,255,0.05);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+label {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+}
+input, select, button {
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+}
+button {
+  background: #06b6d4;
+  color: #04202a;
+  cursor: pointer;
+  margin-top: 10px;
+}
+#output {
+  margin-top: 20px;
+}
+.plan-week {
+  background: rgba(255,255,255,0.05);
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+}
+.workout {
+  background: rgba(255,255,255,0.02);
+  margin: 8px 0;
+  padding: 8px;
+  border-radius: 8px;
+}
+.workout ul {
+  margin: 5px 0 0 15px;
+  padding: 0;
+}
+.workout small {
+  display: block;
+  margin-top: 5px;
+  color: #94a3b8;
+}
+</style>
+</head>
+<body>
+
+<h1>Ultimate Workout Plan Generator</h1>
+<form id="inputForm">
+  <label>Age <input type="number" id="age" value="25" min="10" max="100"></label>
+  <label>Height <input type="number" id="height" value="175"> 
+    <select id="heightUnit"><option value="cm">cm</option><option value="in">inches</option></select>
+  </label>
+  <label>Weight <input type="number" id="weight" value="70"> 
+    <select id="weightUnit"><option value="kg">kg</option><option value="lb">lb</option></select>
+  </label>
+  <label>Fitness Level 
+    <select id="level">
+      <option value="beginner">Beginner</option>
+      <option value="intermediate" selected>Intermediate</option>
+      <option value="advanced">Advanced</option>
+    </select>
+  </label>
+  <label>Goal 
+    <select id="goal">
+      <option value="build">Build Muscle</option>
+      <option value="lose">Lose Fat</option>
+      <option value="strength">Strength</option>
+      <option value="endurance">Endurance</option>
+      <option value="mobility">Mobility</option>
+    </select>
+  </label>
+  <label>Equipment 
+    <select id="equipment">
+      <option value="none">No equipment</option>
+      <option value="dumbbells">Dumbbells</option>
+      <option value="barbell">Barbell</option>
+      <option value="gym">Full gym</option>
+    </select>
+  </label>
+  <button type="submit">Generate Plan</button>
+</form>
+
+<div id="output"></div>
+
+<script>
+// ------------------- EXERCISES -------------------
+const EXERCISES = {
+  body: {
+    push:["Push-ups","Incline Push-ups","Diamond Push-ups","Pike Push-ups","Handstand Push-ups","Clap Push-ups","Decline Push-ups","Hindu Push-ups","Spiderman Push-ups","Archer Push-ups"],
+    pull:["Inverted Row","Towel Row","Pull-ups","Chin-ups","Superman Pull","Doorway Row","Bodyweight Rows","Commando Pull-ups","Australian Pull-ups","Wide Grip Pull-ups"],
+    legs:["Squats","Lunges","Step-ups","Bulgarian Split Squats","Glute Bridges","Wall Sit","Pistol Squat Progression","Jump Squats","Calf Raises","Curtsy Lunges"],
+    core:["Plank","Dead Bug","Bicycle Crunch","Mountain Climbers","Leg Raises","Side Plank","Flutter Kicks","Hollow Hold","V-ups","Russian Twist"]
+  },
+  dumbbells: {
+    push:["Dumbbell Bench Press","Dumbbell Shoulder Press","Dumbbell Fly","Arnold Press","Dumbbell Push-ups","Incline DB Press","DB Floor Press","DB Lateral Raise","DB Front Raise","DB Tricep Kickback"],
+    pull:["One-arm Dumbbell Row","Dumbbell Reverse Fly","Dumbbell Curl","Renegade Row","Hammer Curl","DB Shrug","DB Upright Row","DB Deadlift","DB Pull-over","DB High Pull"],
+    legs:["Goblet Squat","Dumbbell Lunge","Dumbbell Deadlift","Step-ups with Dumbbells","Dumbbell Hip Thrust","DB Side Lunge","DB Romanian Deadlift","DB Sumo Squat","DB Calf Raise","DB Split Squat"],
+    core:["Weighted Plank","Russian Twist","Dumbbell Sit-up","Dumbbell Side Bend","Dumbbell Leg Raise","DB V-up","DB Oblique Crunch","DB Hollow Hold","DB Toe Touch","DB Flutter Kick"]
+  },
+  barbell: {
+    push:["Barbell Bench Press","Overhead Press","Incline Bench Press","Close Grip Bench Press","Barbell Push Press","Barbell Floor Press","Barbell Incline Press","Barbell Front Raise","Barbell JM Press","Barbell Military Press"],
+    pull:["Barbell Row","Deadlift","Barbell Shrug","Pendlay Row","Barbell Curl","Barbell High Pull","Barbell Reverse Curl","Barbell Upright Row","Barbell Y-raise","Barbell Pull-over"],
+    legs:["Back Squat","Front Squat","Romanian Deadlift","Barbell Lunge","Barbell Step-up","Barbell Hip Thrust","Barbell Good Morning","Barbell Hack Squat","Barbell Split Squat","Barbell Calf Raise"],
+    core:["Hanging Knee Raise","Ab Rollout","Landmine Twist","Barbell Side Bend","Barbell Russian Twist","Barbell Sit-up","Barbell V-up","Barbell Oblique Crunch","Barbell Hollow Hold","Barbell Flutter Kick"]
+  },
+  gym: {
+    push:["Chest Press Machine","Shoulder Press Machine","Pec Deck","Cable Fly","Smith Machine Bench","Machine Incline Press","Machine Decline Press","Cable Lateral Raise","Cable Front Raise","Tricep Pushdown"],
+    pull:["Lat Pulldown","Seated Row","Rear Delt Machine","Cable Pull","Machine Assisted Pull-up","Cable Curl","Machine Shrug","Cable Face Pull","Machine Rear Raise","Cable Upright Row"],
+    legs:["Leg Press","Leg Curl","Leg Extension","Hack Squat","Seated Calf Raise","Standing Calf Raise","Glute Kickback Machine","Cable Hip Abduction","Cable Hip Adduction","Smith Machine Lunge"],
+    core:["Cable Crunch","Captain's Chair","Machine Twist","Stability Ball Crunch","Ab Coaster","Cable Side Bend","Hanging Knee Raise","Weighted Decline Sit-up","Medicine Ball Twist","Stability Ball Rollout"]
+  }
+};
+
+// ------------------- GOAL CONFIG -------------------
+const GOAL_CONFIG = {
+  build:{rep:"8-12", sets:3, rest:90, cardio:"2x20-30min low-mod"},
+  lose:{rep:"10-15", sets:3, rest:60, cardio:"3x25-40min incl HIIT"},
+  strength:{rep:"3-6", sets:4, rest:180, cardio:"2x20-30 low"},
+  endurance:{rep:"12-20", sets:3, rest:45, cardio:"3-4 steady-state"},
+  mobility:{rep:"8-15", sets:2, rest:30, cardio:"mobility/walk 20-30min"}
+};
+
+// ------------------- HELPER -------------------
+function pickRandom(arr,n){
+  const shuffled=[...arr].sort(()=>0.5-Math.random());
+  return shuffled.slice(0,n);
+}
+
+// ------------------- BUILD WORKOUT -------------------
+function buildWorkout(type,equip,goal){
+  const db=(equip==="none")?EXERCISES.body:
+           (equip==="dumbbells")?{...EXERCISES.body,...EXERCISES.dumbbells}:
+           (equip==="barbell")?{...EXERCISES.body,...EXERCISES.barbell}:
+           {...EXERCISES.body,...EXERCISES.dumbbells,...EXERCISES.barbell,...EXERCISES.gym};
+  const conf=GOAL_CONFIG[goal];
+  let chosen=[];
+  if(type==="full"){
+    chosen=[...pickRandom(db.push,2),...pickRandom(db.pull,2),...pickRandom(db.legs,1)];
+  } else {
+    chosen=pickRandom(db[type],2);
+  }
+  return {title:type==="full"?"Full Body Workout":type[0].toUpperCase()+type.slice(1)+" Workout", 
+          exercises:chosen.map(e=>({name:e, sets:conf.sets, reps:conf.rep, rest:conf.rest+"s"})),
+          cardio:conf.cardio};
+}
+
+// ------------------- GENERATE PLAN -------------------
+function generatePlan(data){
+  const {level,goal,equipment}=data;
+  let sessions=3;
+  if(goal==="build"||goal==="lose") sessions=(level==="beginner")?3:4;
+  else if(goal==="strength") sessions=(level==="advanced")?4:3;
+  else if(goal==="endurance") sessions=4;
+  else if(goal==="mobility") sessions=3;
+  const weeklyStructure=sessions<=2?["full","full"]:sessions===3?["push","pull","legs"]:["push","pull","legs","full"];
+  const plan={weeks:[]};
+  for(let w=1;w<=4;w++){
+    const week={week:w,days:[]};
+    weeklyStructure.forEach(type=>week.days.push({workout:buildWorkout(type,equipment,goal)}));
+    plan.weeks.push(week);
+  }
+  return plan;
+}
+
+// ------------------- RENDER PLAN -------------------
+function renderPlan(plan){
+  const out=document.getElementById("output");
+  out.innerHTML="";
+  plan.weeks.forEach(w=>{
+    const div=document.createElement("div");
+    div.className="plan-week";
+    div.innerHTML=`<h3>Week ${w.week}</h3>`;
+    w.days.forEach((d,i)=>{
+      let html=`<div class="workout"><strong>Day ${i+1}: ${d.workout.title}</strong><ul>`;
+      d.workout.exercises.forEach(e=>html+=`<li>${e.name} — ${e.sets} sets x ${e.reps} reps (Rest ${e.rest})</li>`);
+      html+=`</ul><small>Cardio: ${d.workout.cardio}</small></div>`;
+      div.innerHTML+=html;
+    });
+    out.appendChild(div);
+  });
+}
+
+// ------------------- FORM HANDLER -------------------
+document.getElementById("inputForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  const data={
+    age:parseInt(document.getElementById("age").value),
+    height:parseInt(document.getElementById("height").value),
+    weight:parseInt(document.getElementById("weight").value),
+    heightUnit:document.getElementById("heightUnit").value,
+    weightUnit:document.getElementById("weightUnit").value,
+    level:document.getElementById("level").value,
+    goal:document.getElementById("goal").value,
+    equipment:document.getElementById("equipment").value
+  };
+  const plan=generatePlan(data);
+  renderPlan(plan);
+});
+</script>
+
+</body>
+</html>
